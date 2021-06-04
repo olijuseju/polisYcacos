@@ -182,19 +182,71 @@ public class Controller : MonoBehaviour
         FindSelectableTiles(false);
 
         /*TODO: Cambia el código de abajo para hacer lo siguiente
-        - Elegimos una casilla aleatoria entre las seleccionables que puede ir el caco
-        - Movemos al caco a esa casilla
-        - Actualizamos la variable currentTile del caco a la nueva casilla
+        - Elegimos una casilla aleatoria entre las seleccionables que puede ir el caco*/
+
+        Tile casillaFinal = null;
+
+        int posicionPoli1 = cops[0].GetComponent<CopMove>().currentTile;
+        int posicionPoli2 = cops[1].GetComponent<CopMove>().currentTile;
+
+        List<Tile> listVisitedTile = new List<Tile>();
+        foreach (var tile in tiles)
+        {
+            if (tile.selectable)
+            {
+                listVisitedTile.Add(tile);
+            }
+        }
+
+        List<Tile> listVisitedTile2 = new List<Tile>();
+        foreach (var tile in tiles)
+        {
+            if (tile.selectable)
+            {
+                listVisitedTile2.Add(tile);
+            }
+        }
+
+        algoritmoBFS(posicionPoli1);
+
+        foreach (Tile visitedTile in listVisitedTile)
+        {
+            casillaFinal = visitedTile;
+
+            if (visitedTile.distance >= casillaFinal.distance)
+            {
+                casillaFinal = visitedTile;
+
+            }
+        }
+
+        algoritmoBFS(posicionPoli2);
+
+        foreach (Tile visitedTile in listVisitedTile2)
+        {
+            if (visitedTile.distance >= casillaFinal.distance)
+            {
+                casillaFinal = visitedTile;
+
+            }
+        }
+
+        //- Movemos al caco a esa casilla
+        robber.GetComponent<RobberMove>().MoveToTile(casillaFinal);
+
+
+        /*- Actualizamos la variable currentTile del caco a la nueva casilla
         */
-        robber.GetComponent<RobberMove>().MoveToTile(tiles[robber.GetComponent<RobberMove>().currentTile]);
+        robber.GetComponent<RobberMove>().currentTile = casillaFinal.numTile;
+
     }
 
     public void EndGame(bool end)
     {
         if(end)
-            finalMessage.text = "You Win!";
+            finalMessage.text = "You Win! :)";
         else
-            finalMessage.text = "You Lose!";
+            finalMessage.text = "You Lose! :(";
         playAgainButton.interactable = true;
         state = Constants.End;
     }
@@ -275,13 +327,38 @@ public class Controller : MonoBehaviour
         }
 
     }
-    
-   
-    
 
-    
+    public void algoritmoBFS(int tile)
+    {
+        Queue<Tile> nodes = new Queue<Tile>();
+        Tile casillaActual;
 
-   
+        nodes.Enqueue(tiles[tile]);
 
-       
+        while (nodes.Count != 0)
+        {
+            casillaActual = nodes.Dequeue();
+
+            foreach (int i in casillaActual.adjacency)
+            {
+                if (tiles[i].visited == false)
+                {
+
+                    tiles[i].visited = true;
+                    tiles[i].parent = casillaActual;
+                    tiles[i].distance = casillaActual.distance + 1;
+
+                    nodes.Enqueue(tiles[i]);
+                }
+            }
+
+        }
+    }
+
+
+
+
+
+
+
 }
