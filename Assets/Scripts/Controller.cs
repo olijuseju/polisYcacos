@@ -230,8 +230,11 @@ public class Controller : MonoBehaviour
     public void FindSelectableTiles(bool cop)
     {
                  
-        int indexcurrentTile;        
+        int indexcurrentTile;
 
+
+        int posPoli1 = cops[0].GetComponent<CopMove>().currentTile;
+        int posPoli2 = cops[1].GetComponent<CopMove>().currentTile;
         if (cop==true)
             indexcurrentTile = cops[clickedCop].GetComponent<CopMove>().currentTile;
         else
@@ -239,17 +242,37 @@ public class Controller : MonoBehaviour
 
         //La ponemos rosa porque acabamos de hacer un reset
         tiles[indexcurrentTile].current = true;
-
+        tiles[indexcurrentTile].visited = true;
+        tiles[indexcurrentTile].parent = null;
+        tiles[indexcurrentTile].distance = 0;
         //Cola para el BFS
         Queue<Tile> nodes = new Queue<Tile>();
 
         //TODO: Implementar BFS. Los nodos seleccionables los ponemos como selectable=true
         //Tendrás que cambiar este código por el BFS
-        for(int i = 0; i < Constants.NumTiles; i++)
-        {
-            tiles[i].selectable = true;
-        }
+        Tile casillaActual = null;
 
+        nodes.Enqueue(tiles[indexcurrentTile]);
+
+        while (nodes.Count != 0)
+        {
+            casillaActual = nodes.Dequeue();
+            casillaActual.selectable = true;
+            if ((casillaActual.distance + 1) < 3)
+            {
+                foreach (int i in casillaActual.adjacency)
+                {
+                    if (tiles[i].visited == false && tiles[i].numTile != posPoli1 && tiles[i].numTile != posPoli2)
+                    {
+                        tiles[i].visited = true;
+                        tiles[i].parent = casillaActual;
+                        tiles[i].distance = casillaActual.distance + 1;
+
+                        nodes.Enqueue(tiles[i]);
+                    }
+                }
+            }
+        }
 
     }
     
